@@ -5,5 +5,5 @@ app_name = 'chat'
 urlpatterns = [
   path('hello/', views.hello, name="hello"),
   path('messages/', views.messages, name="messages"),
-  path('messages/<int:message_id>', views.messageById, name="message")
+  path('messages/<int:message_id>', views.message_by_id, name="message")
 ]

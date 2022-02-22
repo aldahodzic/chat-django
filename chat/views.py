@@ -17,6 +17,6 @@ def messages(request):
     })
 
 
-def messageById(request, message_id):
+def message_by_id(request, message_id):
   message = get_object_or_404(Message, id=message_id)
   return render(request, "chat/message.html", {'message': message})
