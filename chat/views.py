@@ -1,17 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.core.serializers import serialize
 import json
 
 from .models import Message, User
 from .encoders import DateEncoder
-
-# Create your views here.
-
-def hello(request):
-  return HttpResponse("Hello World")
-
 
 def messages(request):
   if request.method == "GET":
@@ -27,9 +20,6 @@ def messages(request):
     message.save()
 
     return HttpResponseRedirect(reverse('chat:messages'))
-
-
-
 
 def message_by_id(request, message_id):
   message = get_object_or_404(Message, id=message_id)
