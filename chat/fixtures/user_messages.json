@@ -1,0 +1,35 @@
+[{
+  "model": "chat.user",
+  "pk": 1,
+  "fields": {
+    "name": "John",
+    "hash": ""
+  }
+}, {
+  "model": "chat.user",
+  "pk": 2,
+  "fields": {
+    "name": "Sally",
+    "hash": "NULL"
+  }
+}, {
+  "model": "chat.message",
+  "pk": 1,
+  "fields": {
+    "body": "Hi Sally",
+    "time_sent": "2022-02-22T01:25:57Z",
+    "is_read": false,
+    "sender": 1,
+    "recipient": 2
+  }
+}, {
+  "model": "chat.message",
+  "pk": 2,
+  "fields": {
+    "body": "Hello John, how are you?",
+    "time_sent": "2022-02-22T01:26:16Z",
+    "is_read": false,
+    "sender": 2,
+    "recipient": 1
+  }
+}]
