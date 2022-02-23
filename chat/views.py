@@ -4,7 +4,7 @@ from django.urls import reverse
 import json
 
 from .models import Message, User
-from .encoders import encode_message, encode_messages
+from .encoders import encode_message, encode_messages, encode_user
 
 def messages(request):
   if request.method == "GET":
@@ -25,6 +25,11 @@ def messages(request):
 def message_by_id(request, message_id):
   message = encode_message(get_object_or_404(Message, id=message_id))
   return JsonResponse(message)
+
+def user_by_id(request, user_id):
+  user = encode_user(get_object_or_404(User, id=user_id))
+  return JsonResponse(user)
+
 
 
 def message_form(request, user_id):
