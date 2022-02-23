@@ -1,0 +1,15 @@
+<form action="{% url 'chat:messages' %}" method="post">
+  {% csrf_token %}
+
+  <input type="hidden" name="sender" value={{user.id}}>
+
+  <label for="recipient">Recipient</label>
+  <input type="text" name="recipient" id="recipient">
+
+  <label for="body">Message:</label>
+  <input type="text" name="body" id="body">
+
+  <input type="submit" value="Send">
+  <input type="reset" value="Cancel">
+
+</form>
