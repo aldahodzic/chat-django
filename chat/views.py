@@ -4,12 +4,13 @@ from django.urls import reverse
 import json
 
 from .models import Message, User
-from .encoders import DateEncoder
+from .encoders import encode_message, encode_messages
 
 def messages(request):
   if request.method == "GET":
-    messages = list(Message.objects.all().values())
-    return HttpResponse(json.dumps(messages, cls=DateEncoder), content_type="application/json")
+    return JsonResponse({
+      'messages': encode_messages(Message.objects.all())
+    })
 
   if request.method == "POST":
     message = Message(
@@ -22,8 +23,8 @@ def messages(request):
     return HttpResponseRedirect(reverse('chat:messages'))
 
 def message_by_id(request, message_id):
-  message = get_object_or_404(Message, id=message_id)
-  return render(request, "chat/message.html", {'message': message})
+  message = encode_message(get_object_or_404(Message, id=message_id))
+  return JsonResponse(message)
 
 
 def message_form(request, user_id):
