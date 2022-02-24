@@ -6,7 +6,7 @@ from .encoders import encode_message, encode_messages, encode_user
 
 client = Client()
 
-class EncodersTest(TestCase):
+class EncoderTests(TestCase):
   fixtures = ['user_messages.json']
 
   def test_encode_user(self):
@@ -31,3 +31,19 @@ class EncodersTest(TestCase):
 
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
+
+class MessagesPostTests(TransactionTestCase):
+  fixtures = ['user_messages.json']
+
+  def test_message_post(self):
+    message_count = len(Message.objects.all())
+
+    new_message = {"body": "Test Message", "sender": 2, "recipient": 1}
+    response = client.post('/messages', new_message)
+
+    self.assertEqual(201, response.status_code)
+    self.assertEquals(message_count + 1, len(Message.objects.all()))
+
+    get_response = client.get('/messages')
+    self.assertContains(get_response, "Test Message")
+
