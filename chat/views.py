@@ -44,9 +44,16 @@ class Users(View):
 
     return HttpResponse(status=201)
 
-def message_by_id(request, message_id):
-  message = encode_message(get_object_or_404(Message, id=message_id))
-  return JsonResponse(message)
+@method_decorator(csrf_exempt, name='dispatch')
+class MessageById(View):
+  def get(self, request, message_id):
+    message = encode_message(get_object_or_404(Message, id=message_id))
+    return JsonResponse(message)
+
+  def delete(self, request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    message.delete()
+    return HttpResponse(status=200)
 
 def user_by_id(request, user_id):
   user = encode_user(get_object_or_404(User, id=user_id))

@@ -68,3 +68,19 @@ class MessagesPostTests(TransactionTestCase):
     get_response = client.get('/users')
     self.assertContains(get_response, "Harry")
 
+
+
+class MessagesDeleteTests(TransactionTestCase):
+  fixtures = ['user_messages.json']
+
+  def test_message_delete(self):
+    message_count = len(Message.objects.all())
+
+    response = client.delete('/messages/1')
+
+    self.assertEqual(200, response.status_code)
+    self.assertEquals(message_count - 1, len(Message.objects.all()))
+
+    get_response = client.get('/messages')
+    self.assertNotContains(get_response, "Hi Sally")
+
