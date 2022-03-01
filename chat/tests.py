@@ -84,3 +84,14 @@ class MessagesDeleteTests(TransactionTestCase):
     get_response = client.get('/messages')
     self.assertNotContains(get_response, "Hi Sally")
 
+
+  def test_user_delete(self):
+      user_count = len(User.objects.all())
+
+      response = client.delete('/users/1')
+
+      self.assertEqual(200, response.status_code)
+      self.assertEquals(user_count - 1, len(User.objects.all()))
+
+      get_response = client.get('/users')
+      self.assertNotContains(get_response, "John")

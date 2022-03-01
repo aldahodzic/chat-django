@@ -55,9 +55,16 @@ class MessageById(View):
     message.delete()
     return HttpResponse(status=200)
 
-def user_by_id(request, user_id):
-  user = encode_user(get_object_or_404(User, id=user_id))
-  return JsonResponse(user)
+@method_decorator(csrf_exempt, name='dispatch')
+class UserById(View):
+  def get(self, request, user_id):
+    user = encode_user(get_object_or_404(User, id=user_id))
+    return JsonResponse(user)
+
+  def delete(self, request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.delete()
+    return HttpResponse(status=200)
 
 def message_form(request, user_id):
   user = get_object_or_404(User, id=user_id)
