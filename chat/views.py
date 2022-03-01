@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import pbkdf2, get_random_string
+from django.contrib.auth.hashers import make_password, get_random_string
 import json
 
 from .models import Message, User
@@ -36,19 +36,9 @@ class Users(View):
     })
 
   def post(self, request):
-    salt = get_random_string()
-    iterations = 10000
-    hash = pbkdf2(
-      request.POST.get('password'),
-      get_random_string(),
-      iterations
-      )
-
-    hash_string = "pbkdf2" + str(iterations) + salt + str(hash)
-
     user = User(
       name=request.POST.get('name'),
-      hash=hash_string
+      hash=make_password(request.POST.get('password'))
     )
     user.save()
 
