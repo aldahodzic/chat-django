@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, QueryDict
 from django.urls import reverse
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -60,6 +60,31 @@ class UserById(View):
   def get(self, request, user_id):
     user = encode_user(get_object_or_404(User, id=user_id))
     return JsonResponse(user)
+
+  def put(self, request, user_id):
+    if (request.content_type == "application/json"):
+      user = get_object_or_404(User, id=user_id)
+      PUT = json.loads(request.body)
+
+      if (PUT.get("name")):
+        user.name = PUT.get("name")
+
+      if (PUT.get("password")):
+        if (len(user.hash.split("$")) == 4):
+          user.hash = make_password(
+            PUT.get("password"),
+            user.hash.split("$")[2]
+          )
+        else:
+          user.hash = make_password(
+            PUT.get("password"),
+          )
+
+      user.save()
+
+      return HttpResponse(status=200)
+    else:
+      return HttpResponse(status=415)
 
   def delete(self, request, user_id):
     user = get_object_or_404(User, id=user_id)

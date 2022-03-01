@@ -69,6 +69,24 @@ class PostTests(TransactionTestCase):
     self.assertContains(get_response, "Harry")
 
 
+class PutTests(TransactionTestCase):
+  fixtures = ['user_messages.json']
+
+  def test_user_put(self):
+      get_response = client.get('/users/1')
+      self.assertContains(get_response, "John")
+      # self.assertContains(get_response, '"hash": ""')
+
+      update_user = '{"name": "Sarah","password": "Test"}'
+      response = client.put('/users/1', update_user, "application/json")
+
+      self.assertEqual(200, response.status_code)
+
+      get_response = client.get('/users/1')
+      self.assertNotContains(get_response, "John")
+      # self.assertNotContains(get_response, '"hash": ""')
+      self.assertContains(get_response, "Sarah")
+
 
 class DeleteTests(TransactionTestCase):
   fixtures = ['user_messages.json']
