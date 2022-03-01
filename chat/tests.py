@@ -40,7 +40,7 @@ class EncoderTests(TestCase):
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
 
-class MessagesPostTests(TransactionTestCase):
+class PostTests(TransactionTestCase):
   fixtures = ['user_messages.json']
 
   def test_message_post(self):
@@ -70,7 +70,7 @@ class MessagesPostTests(TransactionTestCase):
 
 
 
-class MessagesDeleteTests(TransactionTestCase):
+class DeleteTests(TransactionTestCase):
   fixtures = ['user_messages.json']
 
   def test_message_delete(self):
