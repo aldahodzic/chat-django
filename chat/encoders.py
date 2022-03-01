@@ -5,6 +5,10 @@ def encode_user(user):
     'name': user.name
   }
 
+def encode_users(users):
+  return [encode_user(user) for user in users]
+
+
 def encode_message(message):
   return {
     'id': message.id,

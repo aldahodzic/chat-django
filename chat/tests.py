@@ -9,6 +9,14 @@ client = Client()
 class EncoderTests(TestCase):
   fixtures = ['user_messages.json']
 
+
+  def test_encode_users(self):
+    response = client.get('/users')
+    expected = b'{"users": [{"id": 1, "name": "John"}, {"id": 2, "name": "Sally"}]}'
+
+    self.assertEquals(200, response.status_code)
+    self.assertEquals(expected, response.content)
+
   def test_encode_user(self):
     response = client.get('/users/1')
     expected = b'{"id": 1, "name": "John"}'
@@ -46,4 +54,17 @@ class MessagesPostTests(TransactionTestCase):
 
     get_response = client.get('/messages')
     self.assertContains(get_response, "Test Message")
+
+
+  def test_user_post(self):
+    user_count = len(User.objects.all())
+
+    new_user = {"name": "Harry", "password": "Test"}
+    response = client.post('/users', new_user)
+
+    self.assertEqual(201, response.status_code)
+    self.assertEquals(user_count + 1, len(User.objects.all()))
+
+    get_response = client.get('/users')
+    self.assertContains(get_response, "Harry")
 

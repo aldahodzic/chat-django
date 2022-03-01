@@ -1,14 +1,14 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import pbkdf2, get_random_string
 import json
-import logging
 
 from .models import Message, User
-from .encoders import encode_message, encode_messages, encode_user
+from .encoders import encode_message, encode_messages, encode_user, encode_users
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Messages(View):
@@ -24,6 +24,33 @@ class Messages(View):
       body=request.POST.get('body', False)
     )
     message.save()
+
+    return HttpResponse(status=201)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class Users(View):
+  def get(self, request):
+    return JsonResponse({
+      'users': encode_users((User.objects.all()))
+    })
+
+  def post(self, request):
+    salt = get_random_string()
+    iterations = 10000
+    hash = pbkdf2(
+      request.POST.get('password'),
+      get_random_string(),
+      iterations
+      )
+
+    hash_string = "pbkdf2" + str(iterations) + salt + str(hash)
+
+    user = User(
+      name=request.POST.get('name'),
+      hash=hash_string
+    )
+    user.save()
 
     return HttpResponse(status=201)
 
