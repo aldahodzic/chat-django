@@ -2,8 +2,7 @@
 def encode_user(user):
   return {
     'id': user.id,
-    'name': user.name,
-    'hash': user.hash
+    'name': user.name
   }
 
 def encode_users(users):
