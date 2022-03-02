@@ -19,9 +19,9 @@ class Messages(View):
 
   def post(self, request):
     message = Message(
-      recipient=get_object_or_404(User, id=request.POST.get('recipient', False)),
-      sender=get_object_or_404(User, id=request.POST.get('sender', False)),
-      body=request.POST.get('body', False)
+      recipient=get_object_or_404(User, id=request.json.get('recipient', False)),
+      sender=get_object_or_404(User, id=request.json.get('sender', False)),
+      body=request.json.get('body', False)
     )
     message.save()
 
@@ -37,8 +37,8 @@ class Users(View):
 
   def post(self, request):
     user = User(
-      name=request.POST.get('name'),
-      hash=make_password(request.POST.get('password'))
+      name=request.json.get('name'),
+      hash=make_password(request.json.get('password'))
     )
     user.save()
 
@@ -62,29 +62,25 @@ class UserById(View):
     return JsonResponse(user)
 
   def put(self, request, user_id):
-    if (request.content_type == "application/json"):
-      user = get_object_or_404(User, id=user_id)
-      PUT = json.loads(request.body)
+    user = get_object_or_404(User, id=user_id)
 
-      if (PUT.get("name")):
-        user.name = PUT.get("name")
+    if (request.json.get("name")):
+      user.name = request.json.get("name")
 
-      if (PUT.get("password")):
-        if (len(user.hash.split("$")) == 4):
-          user.hash = make_password(
-            PUT.get("password"),
-            user.hash.split("$")[2]
-          )
-        else:
-          user.hash = make_password(
-            PUT.get("password"),
-          )
+    if (request.json.get("password")):
+      if (len(user.hash.split("$")) == 4):
+        user.hash = make_password(
+          request.json.get("password"),
+          user.hash.split("$")[2]
+        )
+      else:
+        user.hash = make_password(
+          request.json.get("password"),
+        )
 
-      user.save()
+    user.save()
 
-      return HttpResponse(status=200)
-    else:
-      return HttpResponse(status=415)
+    return HttpResponse(status=200)
 
   def delete(self, request, user_id):
     user = get_object_or_404(User, id=user_id)

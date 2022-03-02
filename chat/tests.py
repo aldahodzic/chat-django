@@ -1,5 +1,6 @@
 from django.test import TransactionTestCase, TestCase, Client
 from datetime import datetime
+import json
 
 from .models import User, Message
 from .encoders import encode_message, encode_messages, encode_user
@@ -46,8 +47,8 @@ class PostTests(TransactionTestCase):
   def test_message_post(self):
     message_count = len(Message.objects.all())
 
-    new_message = {"body": "Test Message", "sender": 2, "recipient": 1}
-    response = client.post('/messages', new_message)
+    new_message = json.loads('{"body": "Test Message", "sender": 2, "recipient": 1}')
+    response = client.post('/messages', new_message, "application/json")
 
     self.assertEqual(201, response.status_code)
     self.assertEquals(message_count + 1, len(Message.objects.all()))
@@ -59,8 +60,8 @@ class PostTests(TransactionTestCase):
   def test_user_post(self):
     user_count = len(User.objects.all())
 
-    new_user = {"name": "Harry", "password": "Test"}
-    response = client.post('/users', new_user)
+    new_user = json.loads('{"name": "Harry", "password": "Test"}')
+    response = client.post('/users', new_user, "application/json")
 
     self.assertEqual(201, response.status_code)
     self.assertEquals(user_count + 1, len(User.objects.all()))
