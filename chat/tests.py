@@ -1,4 +1,4 @@
-from django.test import TransactionTestCase, TestCase, Client
+from django.test import TransactionTestCase, TestCase, Client, override_settings
 from datetime import datetime
 import json
 
@@ -114,3 +114,21 @@ class DeleteTests(TransactionTestCase):
 
       get_response = client.get('/users')
       self.assertNotContains(get_response, "John")
+
+
+@override_settings(MIDDLEWARE=['chat.middleware.requestmiddleware.json_middleware'])
+class JsonMiddlewareTests(TestCase):
+
+  def test_plain_text(self):
+    new_user = '{"name": "Harry", "password": "Test"}'
+    response = client.post('/users', new_user, "text/plain")
+
+    self.assertEqual(415, response.status_code)
+
+
+  def test_malformed_json(self):
+    # Missing comma in between attributes.
+    new_user = '{"name": "Harry" "password": "Test"}'
+    response = client.post('/users', new_user, "application/json")
+
+    self.assertEqual(400, response.status_code)
