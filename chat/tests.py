@@ -2,6 +2,8 @@ from django.test import TransactionTestCase, TestCase, Client, override_settings
 from datetime import datetime
 import json
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from .models import User, Message
 from .encoders import encode_message, encode_messages, encode_user
 
@@ -47,46 +49,52 @@ class PostTests(TransactionTestCase):
   def test_message_post(self):
     message_count = len(Message.objects.all())
 
-    new_message = json.loads('{"body": "Test Message", "sender": 2, "recipient": 1}')
-    response = client.post('/messages', new_message, "application/json")
+    new_message_json = '{"body": "Test Message", "sender": 2, "recipient": 1}'
+    response = client.post('/messages', new_message_json, "application/json")
 
     self.assertEqual(201, response.status_code)
+
+    # Ensure a message has been added.
     self.assertEquals(message_count + 1, len(Message.objects.all()))
 
-    get_response = client.get('/messages')
-    self.assertContains(get_response, "Test Message")
-
+    # Ensure the message has the correct fields.
+    self.assertEqual(Message.objects.last().body, "Test Message")
+    self.assertEqual(Message.objects.last().sender.id, 2)
+    self.assertEqual(Message.objects.last().recipient.id, 1)
 
   def test_user_post(self):
     user_count = len(User.objects.all())
 
-    new_user = json.loads('{"name": "Harry", "password": "Test"}')
+    new_user = '{"name": "Harry", "password": "Test"}'
     response = client.post('/users', new_user, "application/json")
 
     self.assertEqual(201, response.status_code)
+
+    # Ensure a user has been added.
     self.assertEquals(user_count + 1, len(User.objects.all()))
 
-    get_response = client.get('/users')
-    self.assertContains(get_response, "Harry")
-
+    # Ensure the new user has the correct name.
+    self.assertEqual(User.objects.last().name, "Harry")
 
 class PutTests(TransactionTestCase):
   fixtures = ['user_messages.json']
 
   def test_user_put(self):
-      get_response = client.get('/users/1')
-      self.assertContains(get_response, "John")
-      # self.assertContains(get_response, '"hash": ""')
+      # Sanity test
+      user = User.objects.get(id=1)
+      self.assertEqual(user.name, "John")
 
+      # Update user
       update_user = '{"name": "Sarah","password": "Test"}'
       response = client.put('/users/1', update_user, "application/json")
 
+      # Test response
       self.assertEqual(200, response.status_code)
 
-      get_response = client.get('/users/1')
-      self.assertNotContains(get_response, "John")
-      # self.assertNotContains(get_response, '"hash": ""')
-      self.assertContains(get_response, "Sarah")
+      # Test user has been updated
+      user = User.objects.get(id=1)
+      self.assertNotEqual(user.name, "John")
+      self.assertEqual(user.name, "Sarah")
 
 
 class DeleteTests(TransactionTestCase):
@@ -100,8 +108,7 @@ class DeleteTests(TransactionTestCase):
     self.assertEqual(200, response.status_code)
     self.assertEquals(message_count - 1, len(Message.objects.all()))
 
-    get_response = client.get('/messages')
-    self.assertNotContains(get_response, "Hi Sally")
+    self.assertRaises(ObjectDoesNotExist, lambda  : Message.objects.get(id=1))
 
 
   def test_user_delete(self):
@@ -112,8 +119,8 @@ class DeleteTests(TransactionTestCase):
       self.assertEqual(200, response.status_code)
       self.assertEquals(user_count - 1, len(User.objects.all()))
 
-      get_response = client.get('/users')
-      self.assertNotContains(get_response, "John")
+      self.assertRaises(ObjectDoesNotExist, lambda  : User.objects.get(id=1))
+
 
 
 @override_settings(MIDDLEWARE=['chat.middleware.requestmiddleware.json_middleware'])
