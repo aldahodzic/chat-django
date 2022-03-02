@@ -50,6 +50,16 @@ class MessageById(View):
     message = encode_message(get_object_or_404(Message, id=message_id))
     return JsonResponse(message)
 
+  def put(self, request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+
+    if (request.json.get("is_read")):
+      message.is_read = request.json.get("is_read")
+
+    message.save()
+
+    return HttpResponse(status=200)
+
   def delete(self, request, message_id):
     message = get_object_or_404(Message, id=message_id)
     message.delete()
