@@ -1,10 +1,11 @@
 from django.test import TransactionTestCase, TestCase, Client, override_settings
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import User
 import json
 
-from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Message
+from .models import  Message
 from .encoders import encode_message, encode_messages, encode_user
 
 client = Client()
@@ -15,14 +16,14 @@ class EncoderTests(TestCase):
 
   def test_encode_users(self):
     response = client.get('/users')
-    expected = b'{"users": [{"id": 1, "name": "John"}, {"id": 2, "name": "Sally"}]}'
+    expected = b'{"users": [{"id": 1, "username": "brandon", "email": "contact@brandonmurch.com"}, {"id": 2, "username": "Bob", "email": "Bob@email.com"}]}'
 
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
 
   def test_encode_user(self):
     response = client.get('/users/1')
-    expected = b'{"id": 1, "name": "John"}'
+    expected = b'{"id": 1, "username": "brandon", "email": "contact@brandonmurch.com"}'
 
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
@@ -30,7 +31,7 @@ class EncoderTests(TestCase):
 
   def test_encode_message(self):
     response = client.get('/messages/1')
-    expected = b'{"id": 1, "body": "Hi Sally", "time_sent": "2022-02-22T01:25:57Z", "is_read": false, "sender": {"id": 1, "name": "John"}, "recipient": {"id": 2, "name": "Sally"}}'
+    expected = b'{"id": 1, "body": "Hi Sally", "time_sent": "2022-02-22T01:25:57Z", "is_read": false, "sender": {"id": 1, "username": "brandon", "email": "contact@brandonmurch.com"}, "recipient": {"id": 2, "username": "Bob", "email": "Bob@email.com"}}'
 
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
@@ -38,7 +39,7 @@ class EncoderTests(TestCase):
 
   def test_encode_messages(self):
     response = client.get('/messages')
-    expected = b'{"messages": [{"id": 1, "body": "Hi Sally", "time_sent": "2022-02-22T01:25:57Z", "is_read": false, "sender": {"id": 1, "name": "John"}, "recipient": {"id": 2, "name": "Sally"}}, {"id": 2, "body": "Hello John, how are you?", "time_sent": "2022-02-22T01:26:16Z", "is_read": false, "sender": {"id": 2, "name": "Sally"}, "recipient": {"id": 1, "name": "John"}}]}'
+    expected = b'{"messages": [{"id": 1, "body": "Hi Sally", "time_sent": "2022-02-22T01:25:57Z", "is_read": false, "sender": {"id": 1, "username": "brandon", "email": "contact@brandonmurch.com"}, "recipient": {"id": 2, "username": "Bob", "email": "Bob@email.com"}}, {"id": 2, "body": "Hello John, how are you?", "time_sent": "2022-02-22T01:26:16Z", "is_read": false, "sender": {"id": 2, "username": "Bob", "email": "Bob@email.com"}, "recipient": {"id": 1, "username": "brandon", "email": "contact@brandonmurch.com"}}]}'
 
     self.assertEquals(200, response.status_code)
     self.assertEquals(expected, response.content)
@@ -65,7 +66,7 @@ class PostTests(TransactionTestCase):
   def test_user_post(self):
     user_count = len(User.objects.all())
 
-    new_user = '{"name": "Harry", "password": "Test"}'
+    new_user = '{"username": "Harry", "email": "harry@email.com", "password": "Test"}'
     response = client.post('/users', new_user, "application/json")
 
     self.assertEqual(201, response.status_code)
@@ -74,7 +75,7 @@ class PostTests(TransactionTestCase):
     self.assertEquals(user_count + 1, len(User.objects.all()))
 
     # Ensure the new user has the correct name.
-    self.assertEqual(User.objects.last().name, "Harry")
+    self.assertEqual(User.objects.last().username, "Harry")
 
 class PutTests(TransactionTestCase):
   fixtures = ['user_messages.json']
@@ -82,10 +83,10 @@ class PutTests(TransactionTestCase):
   def test_user_put(self):
       # Sanity test
       user = User.objects.get(id=1)
-      self.assertEqual(user.name, "John")
+      self.assertEqual(user.username, "brandon")
 
       # Update user
-      update_user = '{"name": "Sarah","password": "Test"}'
+      update_user = '{"username": "Sarah", "email": "sarah@email.com", "password": "Test"}'
       response = client.put('/users/1', update_user, "application/json")
 
       # Test response
@@ -93,8 +94,8 @@ class PutTests(TransactionTestCase):
 
       # Test user has been updated
       user = User.objects.get(id=1)
-      self.assertNotEqual(user.name, "John")
-      self.assertEqual(user.name, "Sarah")
+      self.assertNotEqual(user.username, "brandon")
+      self.assertEqual(user.username, "Sarah")
 
 
 class DeleteTests(TransactionTestCase):

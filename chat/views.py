@@ -1,13 +1,13 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse, QueryDict
-from django.urls import reverse
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password, get_random_string
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 import json
 
-from .models import Message, User
+from .models import Message
 from .encoders import encode_message, encode_messages, encode_user, encode_users
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -36,9 +36,10 @@ class Users(View):
     })
 
   def post(self, request):
-    user = User(
-      name=request.json.get('name'),
-      hash=make_password(request.json.get('password'))
+    user = User.objects.create(
+      username=request.json.get('username'),
+      email=request.json.get('email'),
+      password=make_password(request.json.get('password'))
     )
     user.save()
 
@@ -74,14 +75,14 @@ class UserById(View):
   def put(self, request, user_id):
     user = get_object_or_404(User, id=user_id)
 
-    if (request.json.get("name")):
-      user.name = request.json.get("name")
+    if (request.json.get("username")):
+      user.username = request.json.get("username")
 
     if (request.json.get("password")):
-      if (len(user.hash.split("$")) == 4):
+      if (len(user.password.split("$")) == 4):
         user.hash = make_password(
           request.json.get("password"),
-          user.hash.split("$")[2]
+          user.password.split("$")[2]
         )
       else:
         user.hash = make_password(

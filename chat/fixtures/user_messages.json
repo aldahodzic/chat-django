@@ -1,18 +1,38 @@
 [{
-  "model": "chat.user",
+  "model": "auth.user",
   "pk": 1,
   "fields": {
-    "name": "John",
-    "hash": ""
+    "password": "pbkdf2_sha256$180000$p6idxYV90EOC$VaFHyd4H5KhP3WW52B8TZgERcJRd1tJ/4yefFTS7euE=",
+    "last_login": "2022-03-02T04:29:16.641Z",
+    "is_superuser": true,
+    "username": "brandon",
+    "first_name": "",
+    "last_name": "",
+    "email": "contact@brandonmurch.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2022-02-21T12:11:28.410Z",
+    "groups": [],
+    "user_permissions": []
   }
 }, {
-  "model": "chat.user",
+  "model": "auth.user",
   "pk": 2,
   "fields": {
-    "name": "Sally",
-    "hash": "NULL"
+    "password": "pbkdf2_sha256$180000$Ay19Q1nV3BaX$HqjS2tNbMm0U15NCUbgViKD5gO2g8/VZRTXJnfutPMs=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Bob",
+    "first_name": "",
+    "last_name": "",
+    "email": "Bob@email.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-03-02T04:13:11.524Z",
+    "groups": [],
+    "user_permissions": []
   }
-}, {
+},{
   "model": "chat.message",
   "pk": 1,
   "fields": {
